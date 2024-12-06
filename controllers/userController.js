@@ -2,7 +2,7 @@ import userModel from "../models/userModel.js";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 
-export const registerUser = async (req, res) => {
+const registerUser = async (req, res) => {
     const {firstName, lastName, displayName, email, password} = req.body;
     try {
         //Check if arady has an email
@@ -26,5 +26,35 @@ export const registerUser = async (req, res) => {
         res.status(500).json({ message: "Error registering user"});
     }
 };
+
+
+const createToken = (id) => {
+    return jwt.sign({id}, process.env.JWT_SECRET); 
+};
+
+const loginUser = async (req, res) => {
+    try {
+        const {email, password} = req.body;
+        const user = await userModel.findOne({email});
+        if(!user) {
+            return res.status(400).json({message: "User not found"});
+        }
+        //Check password
+        const isMatch = await bcrypt.compare(password, user.password);
+        if(isMatch) {
+            //Create token
+            const token = createToken(user._id);
+            res.status(200).json({ success: true, token });
+        } else {
+            res.status(400).json({ success: false, message: "Invalid credentials"});
+        }
+    } catch (error) {
+        res.status(500).json({ message: "Error logging in user"});  
+    }
+};
+
+export { registerUser, loginUser };
+
+
 
 
