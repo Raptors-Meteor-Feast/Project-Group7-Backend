@@ -8,10 +8,10 @@ import connectCloudinary from "./config/cloudinary.js";
 
 //Custom route
 // import cartRouter from "./routes/cartRoute.js"
-// import gameRouter from "./routes/gameRoute.js"
+import gameRouter from "./routes/gameRoute.js"
 // import newsRouter from "./routes/newsRoute.js"
 // import orderRouter from "./routes/orderRoute.js"
-// import userRouter from "./routes/userRoute.js"
+import userRouter from "./routes/userRoute.js"
 
 //AppConfig
 const app = express();
@@ -56,10 +56,10 @@ app.use(
 
 //API endpoints
 // app.use("/cart", cartRouter);
-// app.use("/game", gameRouter);
+app.use("/api/game", gameRouter);
 // app.use("/news", newsRouter);
 // app.use("/order", orderRouter);
-// app.use("/user", userRouter);
+app.use("/api/user", userRouter);
 
 
 app.get("/", (req, res) => {
