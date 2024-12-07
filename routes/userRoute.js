@@ -1,5 +1,5 @@
 import express from "express";
-import { registerUser, loginUser } from "../controllers/userController.js";
+import { registerUser, loginUser, getdata } from "../controllers/userController.js";
 import authUser from "../middleware/auth.js";
 
 const userRouter = express.Router();
@@ -11,8 +11,9 @@ userRouter.post("/register", registerUser);
 userRouter.post("/login", loginUser);
 
 // GET /api/auth/profile , Check Token
-userRouter.get("/profile", authUser, (req, res) => { 
-    res.status(200).json({ success: true, 
+userRouter.get("/profile", authUser, (req, res) => {
+    res.status(200).json({
+        success: true,
         message: "You are authorized to access this route",
         data: {
             userId: req.body.userId,
@@ -20,7 +21,9 @@ userRouter.get("/profile", authUser, (req, res) => {
             email: req.body.email,
         }
     });
-});   
+});
+
+userRouter.get("/data", authUser, getdata);
 
 
 export default userRouter;
