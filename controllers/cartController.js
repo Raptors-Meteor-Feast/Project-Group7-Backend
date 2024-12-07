@@ -37,7 +37,7 @@ const addToCart = async (req, res) => {
     await userModel.findByIdAndUpdate(userId, { cartData });
 
     // แสดงผลลัพธ์ใน console (optional)
-    console.log(`User ${userId} added game: ${title} to cart`);
+    // console.log(`User ${userId} added game: ${title} to cart`);
 
     res.status(200).json({ success: true, message: "Added To Cart" });
     } catch (error) {
@@ -75,7 +75,7 @@ const deleteGameInCart = async (req, res) => {
     await userModel.findByIdAndUpdate(userId, { cartData });
 
     // แสดงผลลัพธ์ใน console (optional)
-    console.log(`User ${userId} removed game: ${title} from cart`);
+    // console.log(`User ${userId} removed game: ${title} from cart`);
 
     res.status(200).json({ success: true, message: "Game removed from cart" });
     } catch (error) {
@@ -115,3 +115,4 @@ const getUserCart = async (req, res) => {
 };
 
 export { addToCart, deleteGameInCart, getUserCart };
+
