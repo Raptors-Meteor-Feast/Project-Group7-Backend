@@ -10,7 +10,7 @@ userRouter.post("/register", registerUser);
 // POST /api/auth/login
 userRouter.post("/login", loginUser);
 
-// GET /api/auth/profile , Check Token
+// GET /api/auth/profile , TEST ONLY
 userRouter.get("/profile", authUser, (req, res) => {
     res.status(200).json({
         success: true,
@@ -23,6 +23,7 @@ userRouter.get("/profile", authUser, (req, res) => {
     });
 });
 
+// GET /api/auth/data
 userRouter.get("/data", authUser, getdata);
 
 
