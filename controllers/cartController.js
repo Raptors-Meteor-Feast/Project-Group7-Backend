@@ -87,7 +87,8 @@ const deleteGameInCart = async (req, res) => {
 // get user cart data อ่านข้อมูลที่อยู่ใน cart
 const getUserCart = async (req, res) => {
     try {
-    const { userId } = req.body;
+    // const { userId } = req.body;
+    const { userId } = req.query;  // รับค่า userId จาก query string
 
     // ตรวจสอบว่า userId ถูกส่งมาไหม
     if (!userId) {
