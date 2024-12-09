@@ -7,12 +7,11 @@ const userSchema = new mongoose.Schema({
     displayName: { type: String, required: true },
     email: { type: String, required: true, unique: true },
     password: { type: String, required: true },
+    resetPasswordToken: { type: String }, // Token สําหรับรีเซ็ตรหัสผ่าน
+    resetPasswordExpires: { type: Date }, // วันหมดอายุของ Token สําหรับรีเซ็ตรหัสผ่าน
     cartData: { type: Object, default: {} }
-},{ 
-    minimize: false, 
-    versionKey: false
-})
+}, { minimize: false, timestamps: true });
 
-const userModel = mongoose.models.user || mongoose.model('user',userSchema);
+const userModel = mongoose.models.user || mongoose.model('user', userSchema);
 
 export default userModel;
