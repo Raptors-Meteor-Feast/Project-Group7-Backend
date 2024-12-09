@@ -87,7 +87,8 @@ const deleteGameInCart = async (req, res) => {
 // get user cart data อ่านข้อมูลที่อยู่ใน cart
 const getUserCart = async (req, res) => {
     try {
-    const { userId } = req.body;
+    // const { userId } = req.body;
+    const { userId } = req.query;  // รับค่า userId จาก query string
 
     // ตรวจสอบว่า userId ถูกส่งมาไหม
     if (!userId) {
@@ -114,5 +115,64 @@ const getUserCart = async (req, res) => {
 }
 };
 
-export { addToCart, deleteGameInCart, getUserCart };
+// // clear all products in user cart (PATCH)
+// const clearCart = async (req, res) => {
+//     try {
+//         const { userId } = req.body;
+
+//         // ตรวจสอบว่า userId มีหรือไม่
+//         if (!userId) {
+//             return res.status(400).json({ success: false, message: "User ID is required" });
+//         }
+
+//         // ค้นหาข้อมูลผู้ใช้จากฐานข้อมูล
+//         const userData = await userModel.findById(userId);
+//         if (!userData) {
+//             return res.status(404).json({ success: false, message: "User not found" });
+//         }
+
+//         // ตั้งค่า cartData เป็นอ็อบเจ็กต์ว่าง
+//         userData.cartData = {};
+
+//         // บันทึกการเปลี่ยนแปลง
+//         await userModel.findByIdAndUpdate(userId, { cartData: userData.cartData });
+
+//         res.status(200).json({ success: true, message: "All games removed from cart" });
+//     } catch (error) {
+//         console.log(error);
+//         return res.status(500).json({ success: false, message: "An unexpected error occurred. Please try again later." });
+//     }
+// };
+
+
+// clear all products in user cart (PUT)
+const clearCart = async (req, res) => {
+    try {
+        const { userId } = req.body;
+
+        // ตรวจสอบว่า userId มีหรือไม่
+        if (!userId) {
+            return res.status(400).json({ success: false, message: "User ID is required" });
+        }
+
+        // ค้นหาข้อมูลผู้ใช้จากฐานข้อมูล
+        const userData = await userModel.findById(userId);
+        if (!userData) {
+            return res.status(404).json({ success: false, message: "User not found" });
+        }
+
+        // ตั้งค่า cartData เป็นอ็อบเจ็กต์ว่าง
+        userData.cartData = {};
+
+        // บันทึกการเปลี่ยนแปลง
+        await userModel.findByIdAndUpdate(userId, { cartData: userData.cartData });
+
+        res.status(200).json({ success: true, message: "All games removed from cart" });
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({ success: false, message: "An unexpected error occurred. Please try again later." });
+    }
+};
+
+export { addToCart, deleteGameInCart, getUserCart, clearCart };
 

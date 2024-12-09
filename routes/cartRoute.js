@@ -1,10 +1,13 @@
 import express from "express";
-import { addToCart, deleteGameInCart, getUserCart } from "../controllers/cartController.js";
+import { addToCart, deleteGameInCart, getUserCart, clearCart } from "../controllers/cartController.js";
+import authUser from "../middleware/auth.js";
 
 const cartRouter = express.Router();
 
-cartRouter.get("/get", getUserCart);
-cartRouter.post("/add", addToCart);
-cartRouter.delete("/delete", deleteGameInCart);
+cartRouter.get("/get", authUser, getUserCart);
+cartRouter.post("/add", authUser, addToCart);
+cartRouter.delete("/delete", authUser, deleteGameInCart);
+// cartRouter.patch("/clear", authUser, clearCart);
+cartRouter.put("/clear", authUser, clearCart);
 
 export default cartRouter;
