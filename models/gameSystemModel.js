@@ -17,10 +17,7 @@ const gameSystemSchema = new mongoose.Schema({
     }, required: true },
     language: { type: String, required: true },
     text: { type: String, required: true },
-},{
-    versionKey: false
-}
-)
+});
 
 const gameSystemModel = mongoose.models.gameSystem || mongoose.model("gameSystem", gameSystemSchema);
 
