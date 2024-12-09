@@ -1,8 +1,8 @@
 import express from "express";
 import { registerUser, loginUser, getdata } from "../controllers/userController.js";
 import authUser from "../middleware/auth.js";
-import { forgotPassword } from "../controllers/Password/forgotPasswordController.js";
-import { resetPassword } from "../controllers/Password/resetPasswordController.js";
+import forgotPassword from "../controllers/Password/forgotPasswordController.js";
+import resetPassword from "../controllers/Password/resetPasswordController.js";
 
 
 const userRouter = express.Router();
@@ -30,7 +30,7 @@ userRouter.get("/profile", authUser, (req, res) => {
 userRouter.get("/data", authUser, getdata);
 
 userRouter.post("/forgot-password", forgotPassword); // ส่งลิงก์ Reset Password
-userRouter.post("/reset-password/:token", resetPassword); // ตั้งรหัสผ่านใหม่
+userRouter.put("/reset-password/:token", resetPassword); // ตั้งรหัสผ่านใหม่
 
 
 export default userRouter;
