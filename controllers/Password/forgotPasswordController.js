@@ -1,45 +1,67 @@
-import crypto from "crypto";
-import nodemailer from "nodemailer";
+import dotenv from 'dotenv';
+import SibApiV3Sdk from 'sib-api-v3-sdk';
+import crypto from 'crypto';
+import userModel from '../../models/userModel.js';
 
-export const forgotPassword = async (req, res) => {
+dotenv.config();  // โหลดข้อมูลจาก .env
+
+const forgotPassword = async (req, res) => {
     const { email } = req.body;
 
+    if (!email) {
+        return res.status(400).json({ message: "Email is required" });
+    }
+
     try {
-        const user = await userModel.findOne({ email });
+        const user = await userModel.findOne({ email: email.toLowerCase() });
         if (!user) {
             return res.status(404).json({ message: "User not found" });
         }
 
-        // สร้าง Token และกำหนดวันหมดอายุ
         const token = crypto.randomBytes(32).toString("hex");
         const expires = Date.now() + 3600000; // 1 ชั่วโมง
-
-        // บันทึก Token และวันหมดอายุใน DB
         user.resetPasswordToken = token;
         user.resetPasswordExpires = expires;
         await user.save();
 
-        // ส่งอีเมลพร้อมลิงก์
-        const transporter = nodemailer.createTransport({
-            service: "Gmail",
-            auth: {
-                user: process.env.EMAIL_USER,
-                pass: process.env.EMAIL_PASS
-            }
-        });
+        // ตั้งค่า Sendinblue
+        const apiKey = process.env.SENDINBLUE_API_KEY;
+        const defaultClient = SibApiV3Sdk.ApiClient.instance;
+        const apiKeyInstance = defaultClient.authentications['api-key'];
+        apiKeyInstance.apiKey = apiKey;
+        const apiInstance = new SibApiV3Sdk.TransactionalEmailsApi();
 
-        const resetURL = `${req.protocol}://${req.get("host")}/reset-password/${token}`;
-        const mailOptions = {
-            to: user.email,
-            subject: "Password Reset",
-            html: `<p>Please click the link to reset your password:</p>
-                   <a href="${resetURL}">${resetURL}</a>`
+        const resetURL = `http://localhost:5173/reset-password/${token}`;
+
+
+        // สร้างเนื้อหาของอีเมลล์
+        const emailData = {
+            sender: { email: process.env.EMAIL_ADDRESS },  // อีเมลล์ที่ได้รับการยืนยันจาก Sendinblue
+            to: [{ email: user.email }],
+            subject: 'Password Reset',
+            htmlContent: `
+                <html>
+                    <body>
+                        <p>Please click the link below to reset your password:</p>
+                        <a href="${resetURL}">${resetURL}</a>
+                    </body>
+                </html>`,
+            textContent: `Please click the link below to reset your password:`, // เพิ่มข้อความ plain text เผื่อ HTML ไม่แสดง
         };
 
-        await transporter.sendMail(mailOptions);
+        // ส่งอีเมล
+        const response = await apiInstance.sendTransacEmail(emailData);
+        console.log('Email sent successfully:', response);  // แสดงผลการตอบกลับจาก Sendinblue
+
         res.status(200).json({ message: "Reset link sent to your email" });
     } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: "Error sending reset email" });
+        console.error("Error in forgotPassword:", error);
+        res.status(500).json({
+            message: "Error sending reset email",
+            error: error.response ? error.response.body : error.message
+        });
     }
 };
+
+export default forgotPassword;
+

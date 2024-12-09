@@ -80,7 +80,7 @@ const loginUser = async (req, res) => {
 };
 
 // ฟังก์ชันสำหรับดึงข้อมูลผู้ใช้ (ต้องตรวจสอบ token ด้วย)
-const getdata = async (req, res) => {
+const getUserData = async (req, res) => {
     try {
         // ตรวจสอบว่า Authorization header มีค่าเป็น "Bearer <token>" หรือไม่
         const authHeader = req.headers.authorization;
@@ -113,4 +113,4 @@ const getdata = async (req, res) => {
 };
 
 // ส่งออกฟังก์ชันที่ใช้งาน
-export { registerUser, loginUser, getdata };
+export { registerUser, loginUser, getUserData };
