@@ -6,13 +6,11 @@ import connectDB from "./config/mongodb.js";
 import connectCloudinary from "./config/cloudinary.js";
 
 //Custom route
-import cartRouter from "./routes/cartRoute.js"0
+import cartRouter from "./routes/cartRoute.js";
 import gameRouter from "./routes/gameRoute.js";
 import newsRouter from "./routes/newsRoute.js";
 // import orderRouter from "./routes/orderRoute.js"
 import userRouter from "./routes/userRoute.js";
-
-
 
 //AppConfig
 const app = express();
@@ -28,11 +26,11 @@ app.use(express.json());
 // Define the list of allowed origin
 const allowedOrigins = [
   "https://project-group7-frontend.vercel.app", // For User
-    "http://localhost:5173", // For local development
-    "http://localhost:5174", // For local development
-    "http://localhost:5175", // For local development
-    "http://localhost:5176", // For local development
-    "http://localhost:5177", // For local development
+  "http://localhost:5173", // For local development
+  "http://localhost:5174", // For local development
+  "http://localhost:5175", // For local development
+  "http://localhost:5176", // For local development
+  "http://localhost:5177", // For local development
 ];
 
 // Configure CORS
