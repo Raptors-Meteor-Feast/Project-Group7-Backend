@@ -7,9 +7,7 @@ const newsSchema = new mongoose.Schema({
     newsParagraph: { type: String, required: true },
     date: { type: String, required: true },
     newsContributor: { type: String, required: true },
-},{
-    versionKey: false
-})
+});
 
 const newsModel = mongoose.models.news || mongoose.model("news", newsSchema);
 

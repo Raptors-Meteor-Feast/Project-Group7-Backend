@@ -7,7 +7,7 @@ import connectCloudinary from "./config/cloudinary.js";
 
 
 //Custom route
-// import cartRouter from "./routes/cartRoute.js"
+import cartRouter from "./routes/cartRoute.js"
 import gameRouter from "./routes/gameRoute.js"
 // import newsRouter from "./routes/newsRoute.js"
 // import orderRouter from "./routes/orderRoute.js"
@@ -56,7 +56,7 @@ app.use(
 
 
 //API endpoints
-// app.use("/cart", cartRouter);
+app.use("/api/cart", cartRouter);
 app.use("/api/game", gameRouter);
 // app.use("/news", newsRouter);
 // app.use("/order", orderRouter);

@@ -10,9 +10,7 @@ const gameDataSchema = new mongoose.Schema({
     rating: { type: Number, required: true },
     date: { type: Date, default: Date.now },
     bestSeller: { type: Boolean, required: true }
-},{
-    versionKey: false
-})
+});
 
 const gameDataModel = mongoose.models.gameData || mongoose.model("gameData", gameDataSchema);
 
