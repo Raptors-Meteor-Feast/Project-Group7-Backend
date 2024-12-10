@@ -4,13 +4,13 @@ import gameSystemModel from "../models/gameSystemModel.js";
 
 //Get เกมทั้งหมด
 const listGame = async (req, res) => {
-    try {
-        const game = await gameDataModel.find({});
-        res.json({ success: true, game });
-    } catch (error) {
-        console.log(error);
-        res.json({ success: false, message: error.message });
-    }
+  try {
+    const game = await gameDataModel.find({});
+    res.json({ success: true, game });
+  } catch (error) {
+    console.log(error);
+    res.json({ success: false, message: error.message });
+  }
 };
 
 //Get เกมบางเกม
