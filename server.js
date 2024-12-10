@@ -31,6 +31,7 @@ app.use(express.json());
 
 // Define the list of allowed origin
 const allowedOrigins = [
+    "https://project-group7-frontend.vercel.app", // For User
     "http://localhost:5173", // For local development
     "http://localhost:5174", // For local development
     "http://localhost:5175", // For local development
