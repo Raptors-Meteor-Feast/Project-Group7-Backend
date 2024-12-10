@@ -1,10 +1,52 @@
 import userModel from "../models/userModel.js";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
+import dotenv from "dotenv";
+import SibApiV3Sdk from "sib-api-v3-sdk";
+import crypto from "crypto";
+
+
+dotenv.config();
+
+const sendVerificationEmail = async (user) => {
+    const token = crypto.randomBytes(32).toString("hex");  // สร้างโทเค็นยืนยัน
+    const verificationURL = `http://localhost:5173/verify-email/${token}`;  // ลิงก์สำหรับยืนยันอีเมล
+
+    user.emailVerificationToken = token;  // เก็บโทเค็นในฐานข้อมูล
+    await user.save();
+
+    const apiKey = process.env.SENDINBLUE_API_KEY;
+    const defaultClient = SibApiV3Sdk.ApiClient.instance;
+    const apiKeyInstance = defaultClient.authentications["api-key"];
+    apiKeyInstance.apiKey = apiKey;
+    const apiInstance = new SibApiV3Sdk.TransactionalEmailsApi();
+
+    const emailData = {
+        sender: { email: process.env.EMAIL_ADDRESS },
+        to: [{ email: user.email }],
+        subject: "Email Verification",
+        htmlContent: `
+            <html>
+                <body>
+                    <p>Click the link below to verify your email address:</p>
+                    <a href="${verificationURL}">${verificationURL}</a>
+                </body>
+            </html>
+        `,
+        textContent: `Click the link below to verify your email address: ${verificationURL}`,
+    };
+
+    try {
+        await apiInstance.sendTransacEmail(emailData);
+        console.log("Verification email sent.");
+    } catch (error) {
+        console.error("Error sending verification email:", error);
+    }
+};
 
 // ฟังก์ชันสำหรับลงทะเบียนผู้ใช้ใหม่
 const registerUser = async (req, res) => {
-    const { firstName, lastName, displayName, email, password } = req.body; // ดึงข้อมูลจาก body ของคำขอ
+    const { firstName, lastName, displayName, email, password } = req.body;
 
     try {
         // ตรวจสอบว่ามีผู้ใช้อีเมลนี้ในระบบแล้วหรือยัง
@@ -37,14 +79,41 @@ const registerUser = async (req, res) => {
             password: hashedPassword, // ใช้รหัสผ่านที่แฮชแล้ว
         });
 
+        await sendVerificationEmail(newUser);
+
         // ตอบกลับผู้ใช้ที่ลงทะเบียนสำเร็จ
-        res.status(201).json({ message: "User registered successfully", userId: newUser._id });
+        res.status(201).json({ message: "User registered successfully. Please verify your email.", userId: newUser._id });
     } catch (error) {
         // ถ้ามีข้อผิดพลาดในระหว่างการลงทะเบียน
         console.error(error);
         res.status(500).json({ message: "Error registering user" });
     }
 };
+
+// ฟังก์ชันสำหรับการยืนยันอีเมล
+const verifyEmail = async (req, res) => {
+    const { token } = req.params;
+
+    try {
+        const user = await userModel.findOne({
+            emailVerificationToken: token,
+        });
+
+        if (!user) {
+            return res.status(400).json({ message: "Invalid or expired token" });
+        }
+
+        user.isEmailVerified = true;
+        user.emailVerificationToken = undefined;  // ลบโทเค็นออก
+        await user.save();
+
+        res.status(200).json({ message: "Email verified successfully" });
+    } catch (error) {
+        console.error("Error in verifyEmail:", error);
+        res.status(500).json({ message: "Error verifying email" });
+    }
+};
+
 
 // ฟังก์ชันสำหรับสร้าง JWT token
 const createToken = (id) => {
@@ -112,5 +181,5 @@ const getUserData = async (req, res) => {
     }
 };
 
-// ส่งออกฟังก์ชันที่ใช้งาน
-export { registerUser, loginUser, getUserData };
+
+export { registerUser, loginUser, getUserData, verifyEmail };
