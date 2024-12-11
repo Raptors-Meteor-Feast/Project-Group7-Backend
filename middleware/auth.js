@@ -3,6 +3,7 @@ import jwt from "jsonwebtoken";
 const authUser = async (req, res, next) => {
     // ดึง Authorization header ออกมา
     const authHeader = req.headers.authorization;
+    console.log(authHeader)
 
     // ตรวจสอบว่า header มีค่าและมี "Bearer " อยู่ในข้อความหรือไม่
     if (!authHeader || !authHeader.startsWith("Bearer ")) {
