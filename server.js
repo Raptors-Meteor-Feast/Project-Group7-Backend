@@ -50,14 +50,14 @@ app.use(
                 callback(new Error("Not allowed by CORS")); // Block the origin
             }
         },
-        methods: ["GET", "POST", "PUT", "DELETE"],
+        methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
         credentials: true, // Allow cookies or Authorization headers
     })
 );
 
 
 //API endpoints
-app.use("/api/cart", cartRouter);
+app.use("/api/checkout", cartRouter);
 app.use("/api/game", gameRouter);
 // app.use("/news", newsRouter);
 // app.use("/order", orderRouter);

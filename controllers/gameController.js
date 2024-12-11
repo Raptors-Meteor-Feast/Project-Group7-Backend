@@ -38,4 +38,5 @@ const getDetailGame = async (req, res) => {
 }
 
 
+
 export { listGame, getDetailGame };
