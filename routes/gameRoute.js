@@ -3,7 +3,7 @@ import { listGame , getDetailGame } from "../controllers/gameController.js";
 
 const gameRouter = express.Router();
 
-gameRouter.get("/browse", listGame);
+gameRouter.get("/", listGame);
 gameRouter.get("/:id", getDetailGame);
 
 
