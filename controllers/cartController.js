@@ -1,10 +1,12 @@
 import userModel from "../models/userModel.js";
 import gameDataModel from "../models/gameDataModel.js";
-
+import jwt from "jsonwebtoken";
 // add products to user cart
 const addToCart = async (req, res) => {
     try {
-    const { userId, gameId, title, categories, price } = req.body;
+    const { gameId, title, categories, price, images } = req.body;
+    // const decoded = jwt.verify(req.headers.authorization, process.env.JWT_SECRET);
+    // console.log("decoded",decoded)
     const userData = await userModel.findById(userId);
         if (!userData) {
             return res.status(404).json({ success: false, message: "User not found" });
@@ -26,10 +28,10 @@ const addToCart = async (req, res) => {
         title: title,
         categories: categories,
         price: price,
-        
+        images: images
     };
     // บันทึกข้อมูลที่อัพเดทในฐานข้อมูล
-    await userModel.findByIdAndUpdate(userId, { cartData });
+    // await userModel.findByIdAndUpdate(userId, { cartData });
     // แสดงผลลัพธ์ใน console (optional)
     // console.log(`User ${userId} added game: ${title} to cart`);
     res.status(200).json({ success: true, message: "Added To Cart" });
