@@ -4,10 +4,10 @@ import userModel from "../models/userModel.js"; // Import userModel
 // Controller สำหรับสร้างคำสั่งซื้อใหม่
 const createOrder = async (req, res) => {
     try {
-        const { userId, items, amount, paymentMethod } = req.body;
+        const { userId, gameId, amount, paymentMethod } = req.body;
 
         // ตรวจสอบข้อมูลที่ส่งมาว่าครบถ้วนหรือไม่
-        if (!userId || !items || !amount || !paymentMethod) {
+        if (!userId || !gameId || !amount || !paymentMethod) {
             return res.status(400).json({ message: "Not enough data" });
         }
 
@@ -20,7 +20,7 @@ const createOrder = async (req, res) => {
         // สร้างคำสั่งซื้อในฐานข้อมูล
         const newOrder = new orderModel({
             userId,
-            items,
+            gameId,
             amount,
             paymentMethod,
             status: "Waiting for verify",
