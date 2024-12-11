@@ -9,7 +9,7 @@ import connectCloudinary from "./config/cloudinary.js";
 import cartRouter from "./routes/cartRoute.js";
 import gameRouter from "./routes/gameRoute.js";
 import newsRouter from "./routes/newsRoute.js";
-// import orderRouter from "./routes/orderRoute.js"
+import orderRouter from "./routes/orderRoute.js"
 import userRouter from "./routes/userRoute.js";
 
 //AppConfig
@@ -54,7 +54,7 @@ app.use(
 app.use("/api/cart", cartRouter);
 app.use("/api/game", gameRouter);
 app.use("/api/news", newsRouter);
-// app.use("/order", orderRouter);
+app.use("/api/orders", orderRouter);
 app.use("/api/user", userRouter);
 
 app.get("/", (req, res) => {
