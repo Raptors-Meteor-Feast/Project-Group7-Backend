@@ -37,5 +37,15 @@ const getDetailGame = async (req, res) => {
     }
 }
 
+const searchGame = async (req, res) => {
+  const { title } = req.body; 
+  try {
+    // ใช้ Regular Expression และ options "i" สำหรับ case-insensitive
+    const games = await gameDataModel.find({ title: { $regex: title, $options: "i" } });
+    res.status(200).json({ games });
+  } catch (error) {
+    res.status(500).json({ message: "Error fetching games", error });
+  }
+};
 
-export { listGame, getDetailGame };
+export { listGame, getDetailGame, searchGame };
