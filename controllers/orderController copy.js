@@ -52,8 +52,8 @@ const createOrder = async (req, res) => {
                 message: "ข้อมูลไม่ครบถ้วน กรุณากรอกข้อมูลให้ครบ"
             });
         }
-
-
+        
+        
         // ตรวจสอบว่าผู้ใช้และเกมที่ระบุมีอยู่จริง
         const user = await User.findById(userId); // ค้นหาผู้ใช้จาก ID
         const game = await GameData.findById(gameId); // ค้นหาเกมจาก ID
@@ -87,8 +87,7 @@ const createOrder = async (req, res) => {
         // ส่งคำตอบกลับไปยังผู้เรียก
         res.status(201).json({
             message: "สร้างคำสั่งซื้อสำเร็จ",
-            order: savedOrder,
-            orderId: savedOrder._id // ส่ง orderId กลับไปให้ frontend
+            order: savedOrder
         });
     } catch (error) {
         console.error("เกิดข้อผิดพลาดในการสร้างคำสั่งซื้อ:", error);
