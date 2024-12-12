@@ -4,10 +4,10 @@ import authUser from "../middleware/auth.js";
 
 const cartRouter = express.Router();
 
-cartRouter.get("/get", authUser, getUserCart);
+cartRouter.get("/", authUser, getUserCart);
 cartRouter.post("/add", authUser, addToCart);
 cartRouter.delete("/delete", authUser, deleteGameInCart);
-// cartRouter.patch("/clear", authUser, clearCart);
-cartRouter.put("/clear", authUser, clearCart);
+cartRouter.patch("/clear", authUser, clearCart);
+
 
 export default cartRouter;

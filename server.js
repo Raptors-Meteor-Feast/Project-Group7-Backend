@@ -35,23 +35,24 @@ const allowedOrigins = [
 
 // Configure CORS
 app.use(
-  cors({
-    origin: (origin, callback) => {
-      // Allow requests with no origin (e.g., mobile apps or curl)
-      if (!origin) return callback(null, true);
-      if (allowedOrigins.includes(origin)) {
-        callback(null, true); // Allow the origin
-      } else {
-        callback(new Error("Not allowed by CORS")); // Block the origin
-      }
-    },
-    methods: ["GET", "POST", "PUT", "DELETE"],
-    credentials: true, // Allow cookies or Authorization headers
-  })
+    cors({
+        origin: (origin, callback) => {
+            // Allow requests with no origin (e.g., mobile apps or curl)
+            if (!origin) return callback(null, true);
+            if (allowedOrigins.includes(origin)) {
+                callback(null, true); // Allow the origin
+            } else {
+                callback(new Error("Not allowed by CORS")); // Block the origin
+            }
+        },
+        methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
+        credentials: true, // Allow cookies or Authorization headers
+    })
+
 );
 
 //API endpoints
-app.use("/api/cart", cartRouter);
+app.use("/api/checkout", cartRouter);
 app.use("/api/game", gameRouter);
 app.use("/api/news", newsRouter);
 app.use("/api/orders", orderRouter);
