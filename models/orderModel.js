@@ -9,7 +9,7 @@ const orderSchema = new mongoose.Schema({
     paymentMethod: {
         type: String,
         required: true,
-        enum: ['kbank', 'scb', 'krungsri', 'credit card', 'paypal'] // กำหนดค่า enum ที่อนุญาต
+        enum: ['promptpay','kbank', 'scb', 'krungsri', 'creditcard', 'paypal'] // กำหนดค่า enum ที่อนุญาต
     },
     payment: { type: Boolean, required: true, default: false },
     date: { type: Date, required: true, default: Date.now }
