@@ -3,10 +3,10 @@ import userModel from "../../models/userModel.js";
 
 const resetPassword = async (req, res) => {
     const { token } = req.params;
-    const { password } = req.body;
+    const { newPassword } = req.body;
 
     // ตรวจสอบว่า token และ password ถูกส่งมาหรือไม่
-    if (!token || !password) {
+    if (!token || !newPassword) {
         return res.status(400).json({ message: "Token and password are required" });
     }
 
@@ -23,7 +23,7 @@ const resetPassword = async (req, res) => {
 
         // แฮชรหัสผ่านใหม่
         const salt = await bcrypt.genSalt(10);
-        user.password = await bcrypt.hash(password, salt);
+        user.password = await bcrypt.hash(newPassword, salt);
 
         // ล้าง Token และวันหมดอายุ
         user.resetPasswordToken = undefined;
