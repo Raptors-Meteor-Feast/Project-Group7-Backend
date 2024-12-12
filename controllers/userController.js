@@ -1,10 +1,55 @@
 import userModel from "../models/userModel.js";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
+import dotenv from "dotenv";
+import SibApiV3Sdk from "sib-api-v3-sdk";
+
+dotenv.config();
+
+const sendVerificationEmail = async (user) => {
+    // สร้าง JWT token สำหรับยืนยันอีเมล
+    const token = jwt.sign(
+        { id: user._id },
+        process.env.JWT_SECRET,
+        { expiresIn: "1h" } // กำหนดเวลาให้หมดอายุภายใน 1 ชั่วโมง
+    );
+
+    // สร้าง URL สำหรับยืนยันอีเมล
+    const verificationURL = `http://localhost:5173/verify-email/${token}`;
+
+    const apiKey = process.env.SENDINBLUE_API_KEY;
+    const defaultClient = SibApiV3Sdk.ApiClient.instance;
+    const apiKeyInstance = defaultClient.authentications["api-key"];
+    apiKeyInstance.apiKey = apiKey;
+    const apiInstance = new SibApiV3Sdk.TransactionalEmailsApi();
+
+    const emailData = {
+        sender: { email: process.env.EMAIL_ADDRESS },
+        to: [{ email: user.email }],
+        subject: "Email Verification",
+        htmlContent: `
+            <html>
+                <body>
+                    <p>Click the link below to verify your email address:</p>
+                    <a href="${verificationURL}">${verificationURL}</a>
+                </body>
+            </html>
+        `,
+        textContent: `Click the link below to verify your email address: ${verificationURL}`,
+    };
+
+    try {
+        await apiInstance.sendTransacEmail(emailData);
+        console.log("Verification email sent.");
+    } catch (error) {
+        console.error("Error sending verification email:", error);
+    }
+};
+
 
 // ฟังก์ชันสำหรับลงทะเบียนผู้ใช้ใหม่
 const registerUser = async (req, res) => {
-    const { firstName, lastName, displayName, email, password } = req.body; // ดึงข้อมูลจาก body ของคำขอ
+    const { firstName, lastName, displayName, email, password } = req.body;
 
     try {
         // ตรวจสอบว่ามีผู้ใช้อีเมลนี้ในระบบแล้วหรือยัง
@@ -37,8 +82,10 @@ const registerUser = async (req, res) => {
             password: hashedPassword, // ใช้รหัสผ่านที่แฮชแล้ว
         });
 
+        await sendVerificationEmail(newUser);
+
         // ตอบกลับผู้ใช้ที่ลงทะเบียนสำเร็จ
-        res.status(201).json({ message: "User registered successfully", userId: newUser._id });
+        res.status(201).json({ message: "User registered successfully. Please verify your email.", userId: newUser._id });
     } catch (error) {
         // ถ้ามีข้อผิดพลาดในระหว่างการลงทะเบียน
         console.error(error);
@@ -46,34 +93,47 @@ const registerUser = async (req, res) => {
     }
 };
 
-// ฟังก์ชันสำหรับสร้าง JWT token
-const createToken = (id) => {
-    if (!process.env.JWT_SECRET) {
-        throw new Error("JWT_SECRET is not defined");
+// ฟังก์ชันสำหรับการยืนยันอีเมล
+const verifyEmail = async (req, res) => {
+    const { token } = req.params;
+
+    try {
+        // ตรวจสอบความถูกต้องของ token โดยใช้ jwt.verify
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+        const user = await userModel.findById(decoded.id);
+        if (!user) {
+            return res.status(400).json({ message: "Invalid or expired token" });
+        }
+
+        // ทำการยืนยันอีเมลและลบ token (ไม่ต้องเก็บ token ในฐานข้อมูลแล้ว)
+        user.isEmailVerified = true;
+        await user.save();
+
+        res.status(200).json({ message: "Email verified successfully" });
+    } catch (error) {
+        console.error("Error in verifyEmail:", error);
+        res.status(500).json({ message: "Error verifying email" });
     }
-    return jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: "1h" }); // สร้าง token โดยกำหนดเวลาให้หมดอายุภายใน 1 ชั่วโมง
 };
 
-// ฟังก์ชันสำหรับการเข้าสู่ระบบ (login)
+
 const loginUser = async (req, res) => {
     try {
-        const { email, password } = req.body; // ดึงข้อมูลจาก body ของคำขอ
-        const user = await userModel.findOne({ email }); // ค้นหาผู้ใช้จากอีเมล
-        if (!user) { // ถ้าไม่พบผู้ใช้
+        const { email, password } = req.body;
+        const user = await userModel.findOne({ email });
+        if (!user) {
             return res.status(400).json({ message: "User not found" });
         }
 
-        // ตรวจสอบรหัสผ่าน
         const isMatch = await bcrypt.compare(password, user.password);
-        if (isMatch) { // ถ้ารหัสผ่านตรงกัน
-            // สร้าง JWT token และส่งกลับไปให้ผู้ใช้
-            const token = createToken(user._id);
+        if (isMatch) {
+            const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: "1h" });
             res.status(200).json({ success: true, token });
         } else {
             res.status(400).json({ success: false, message: "Invalid credentials" });
         }
     } catch (error) {
-        // ถ้ามีข้อผิดพลาดในการเข้าสู่ระบบ
         console.error(error);
         res.status(500).json({ message: "Error logging in user" });
     }
@@ -112,5 +172,5 @@ const getUserData = async (req, res) => {
     }
 };
 
-// ส่งออกฟังก์ชันที่ใช้งาน
-export { registerUser, loginUser, getUserData };
+
+export { registerUser, loginUser, getUserData, verifyEmail };
