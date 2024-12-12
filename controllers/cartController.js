@@ -18,7 +18,6 @@ const addToCart = async (req, res) => {
     let cartData = userData.cartData || {}; // ถ้า cartData ไม่มี, สร้างเป็น Object ว่าง
         // ตรวจสอบว่าเกมนั้นมีอยู่ในตะกร้าของผู้ใช้แล้วหรือยัง
         if (cartData[gameId]) {
-            console.log("sunday")
             return res.status(400).json({ success: false, message: "Game is already in the cart" });
         }
 
@@ -43,7 +42,6 @@ const addToCart = async (req, res) => {
 const deleteGameInCart = async (req, res) => {
     try {
     const { gameId, userId } = req.body; // รับข้อมูล userId และ gameId จาก body
-    console.log(req.body)
     // ตรวจสอบว่า userId และ gameId มีอยู่ใน body หรือไม่
     if (!userId || !gameId) {
         return res.status(400).json({ success: false, message: "Missing required fields" });
