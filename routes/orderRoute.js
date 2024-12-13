@@ -12,7 +12,7 @@ const router = express.Router();
 const upload = multer({ dest: "uploads/" }); // จัดการการอัปโหลดไฟล์
 
 // เส้นทางอัปโหลดใบเสร็จการชำระเงิน
-router.post("/:orderId/receipt", authUser, upload.single("receipt"), uploadReceipt);
+router.post("/:orderId/receipt", authUser, upload.array("files"), uploadReceipt);
 
 // เส้นทางสร้างคำสั่งซื้อ (ต้องล็อกอิน)
 router.post('/', authUser, createOrder);

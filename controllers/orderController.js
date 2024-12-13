@@ -6,22 +6,24 @@ import cloudinary from "cloudinary";
 // ฟังก์ชันอัปโหลดรูปภาพใบเสร็จ
 const uploadReceipt = async (req, res) => {
     try {
-        const { orderId } = req.params; // ดึง ID คำสั่งซื้อ
-        const file = req.file; // รูปที่อัปโหลด
+        const { orderId } = req.params;
+        const files = req.files;
 
-        if (!file) {
+        if (!files || files.length === 0) {
             return res.status(400).json({ message: "กรุณาอัปโหลดรูปภาพใบเสร็จ" });
         }
 
-        // อัปโหลดรูปภาพไปยัง Cloudinary
-        const result = await cloudinary.v2.uploader.upload(file.path, {
-            folder: "paymentReceipts"
-        });
+        const uploadedImages = [];
+        for (const file of files) {
+            const result = await cloudinary.v2.uploader.upload(file.path, {
+                folder: "paymentReceipts",
+            });
+            uploadedImages.push(result.secure_url);
+        }
 
-        // อัปเดตรูปภาพในคำสั่งซื้อ
         const updatedOrder = await Order.findByIdAndUpdate(
             orderId,
-            { paymentReceipt: result.secure_url },
+            { $push: { paymentReceipts: { $each: uploadedImages } } },
             { new: true }
         );
 
@@ -31,13 +33,13 @@ const uploadReceipt = async (req, res) => {
 
         res.status(200).json({
             message: "อัปโหลดรูปใบเสร็จสำเร็จ",
-            order: updatedOrder
+            order: updatedOrder,
         });
     } catch (error) {
         console.error("เกิดข้อผิดพลาดในการอัปโหลดใบเสร็จ:", error);
         res.status(500).json({ message: "เกิดข้อผิดพลาดในเซิร์ฟเวอร์" });
     }
-};
+}
 
 
 // เพิ่มฟังก์ชันในการสร้างคำสั่งซื้อใหม่

@@ -11,7 +11,7 @@ const orderSchema = new mongoose.Schema({
         required: true,
         enum: ['promptpay', 'kbank', 'scb', 'krungsri', 'creditcard', 'paypal']
     },
-    paymentReceipt: { type: String }, // URL รูปใบเสร็จ
+    paymentReceipts: [{ type: String }], // Array สำหรับเก็บ URL ของใบเสร็จ
     payment: { type: Boolean, required: true, default: false },
     date: { type: Date, required: true, default: Date.now }
 });
