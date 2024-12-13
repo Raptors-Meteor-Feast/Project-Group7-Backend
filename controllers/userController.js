@@ -15,7 +15,9 @@ const sendVerificationEmail = async (user) => {
     );
 
     // สร้าง URL สำหรับยืนยันอีเมล
-    const verificationURL = `http://localhost:5173/verify-email/${token}`;
+    const verificationURL = `${import.meta.env.VITE_APP_BASE_URL}/verify-email/${token}`;
+
+    // const verificationURL = `http://localhost:5173/verify-email/${token}`;
 
     const apiKey = process.env.SENDINBLUE_API_KEY;
     const defaultClient = SibApiV3Sdk.ApiClient.instance;
