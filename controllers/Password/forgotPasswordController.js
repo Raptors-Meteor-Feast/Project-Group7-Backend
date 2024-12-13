@@ -31,7 +31,8 @@ const forgotPassword = async (req, res) => {
         apiKeyInstance.apiKey = apiKey;
         const apiInstance = new SibApiV3Sdk.TransactionalEmailsApi();
 
-        const resetURL = `${import.meta.env.VITE_APP_BASE_URL}/reset-password/${token}`;
+        const resetURL = `${process.env.VITE_APP_BASE_URL}/reset-password/${token}`;
+
 
 
         // สร้างเนื้อหาของอีเมลล์
