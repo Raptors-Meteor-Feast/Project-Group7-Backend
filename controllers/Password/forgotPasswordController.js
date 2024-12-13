@@ -31,7 +31,6 @@ const forgotPassword = async (req, res) => {
         apiKeyInstance.apiKey = apiKey;
         const apiInstance = new SibApiV3Sdk.TransactionalEmailsApi();
 
-        // const resetURL = `http://localhost:5173/reset-password/${token}`;
         const resetURL = `${import.meta.env.VITE_APP_BASE_URL}/reset-password/${token}`;
 
 
