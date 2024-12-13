@@ -3,14 +3,14 @@ import GameData from "../models/gameDataModel.js";
 import User from "../models/userModel.js";
 import cloudinary from "cloudinary";
 
-// ฟังก์ชันอัปโหลดรูปภาพใบเสร็จ
+
 const uploadReceipt = async (req, res) => {
     try {
         const { orderId } = req.params;
         const files = req.files;
 
         if (!files || files.length === 0) {
-            return res.status(400).json({ message: "กรุณาอัปโหลดรูปภาพใบเสร็จ" });
+            return res.status(400).json({ message: "Upload at least one image" });
         }
 
         const uploadedImages = [];
@@ -28,16 +28,16 @@ const uploadReceipt = async (req, res) => {
         );
 
         if (!updatedOrder) {
-            return res.status(404).json({ message: "ไม่พบคำสั่งซื้อ" });
+            return res.status(404).json({ message: "Order not found" });
         }
 
         res.status(200).json({
-            message: "อัปโหลดรูปใบเสร็จสำเร็จ",
+            message: "Upload successful",
             order: updatedOrder,
         });
     } catch (error) {
-        console.error("เกิดข้อผิดพลาดในการอัปโหลดใบเสร็จ:", error);
-        res.status(500).json({ message: "เกิดข้อผิดพลาดในเซิร์ฟเวอร์" });
+        console.error("Upload error:", error);
+        res.status(500).json({ message: "Server error" });
     }
 }
 
@@ -50,30 +50,29 @@ const createOrder = async (req, res) => {
         // ตรวจสอบข้อมูลที่จำเป็น
         if (!userId || !gameId || !amount || !paymentMethod) {
             return res.status(400).json({
-                message: "ข้อมูลไม่ครบถ้วน กรุณากรอกข้อมูลให้ครบ"
+                message: "Invalid request data",
             });
         }
 
 
         // ตรวจสอบว่าผู้ใช้และเกมที่ระบุมีอยู่จริง
-        const user = await User.findById(userId); // ค้นหาผู้ใช้จาก ID
-        const game = await GameData.findById(gameId); // ค้นหาเกมจาก ID
-
+        const user = await User.findById(userId);
+        const game = await GameData.findById(gameId);
         if (!user) { // ถ้าไม่พบผู้ใช้
-            return res.status(404).json({ message: "ไม่พบผู้ใช้ที่ระบุ" });
+            return res.status(404).json({ message: "Invalid user" });
         }
 
         if (!game) { // ถ้าไม่พบเกม
-            return res.status(404).json({ message: "ไม่พบเกมที่ระบุ" });
+            return res.status(404).json({ message: "Invalid game" });
         }
 
         // สร้างเอกสารคำสั่งซื้อใหม่
         const newOrder = new Order({
-            userId, // ID ของผู้ใช้ที่สั่งซื้อ
-            gameId, // ID ของเกมที่ซื้อ
-            amount, // จำนวนเงินที่ชำระ
-            paymentMethod, // วิธีการชำระเงิน
-            status: "รอการชำระเงิน" // สถานะเริ่มต้นของคำสั่งซื้อ
+            userId,
+            gameId,
+            amount,
+            paymentMethod,
+            status: "Waiting for verify"
         });
 
         // บันทึกคำสั่งซื้อในฐานข้อมูล
@@ -87,14 +86,14 @@ const createOrder = async (req, res) => {
 
         // ส่งคำตอบกลับไปยังผู้เรียก
         res.status(201).json({
-            message: "สร้างคำสั่งซื้อสำเร็จ",
+            message: "Order created successfully",
             order: savedOrder,
             orderId: savedOrder._id // ส่ง orderId กลับไปให้ frontend
         });
     } catch (error) {
-        console.error("เกิดข้อผิดพลาดในการสร้างคำสั่งซื้อ:", error);
+        console.error("Error creating order:", error);
         res.status(500).json({
-            message: "เกิดข้อผิดพลาดในเซิร์ฟเวอร์",
+            message: "Server error",
             error: error.message
         });
     }
@@ -108,7 +107,7 @@ const getUserOrders = async (req, res) => {
         // ตรวจสอบว่าผู้ใช้มีอยู่จริง
         const user = await User.findById(userId);
         if (!user) {
-            return res.status(404).json({ message: "ไม่พบผู้ใช้" });
+            return res.status(404).json({ message: "User not found" });
         }
 
         // ดึงคำสั่งซื้อทั้งหมดของผู้ใช้
@@ -118,9 +117,9 @@ const getUserOrders = async (req, res) => {
 
         res.status(200).json(orders); // ส่งข้อมูลคำสั่งซื้อกลับไปยังผู้เรียก
     } catch (error) {
-        console.error("เกิดข้อผิดพลาดในการดึงข้อมูลคำสั่งซื้อ:", error);
+        console.error("Error fetching user orders:", error);
         res.status(500).json({
-            message: "เกิดข้อผิดพลาดในการดึงข้อมูลคำสั่งซื้อ",
+            message: "Server error",
             error: error.message
         });
     }
@@ -134,25 +133,25 @@ const updateOrderStatus = async (req, res) => {
 
         // รายการสถานะที่อนุญาต
         const allowedStatuses = [
-            "รอการชำระเงิน",
-            "ชำระเงินสำเร็จ",
-            "กำลังดำเนินการ",
-            "สำเร็จ",
-            "ยกเลิก"
+            "Pending",
+            "Waiting for verify",
+            "On progress",
+            "Completed",
+            "Cancelled"
         ];
 
         // ตรวจสอบว่าสถานะที่ส่งมาอยู่ในรายการที่อนุญาต
         if (!allowedStatuses.includes(status)) {
             return res.status(400).json({
-                message: "สถานะไม่ถูกต้อง"
+                message: "Status not allowed"
             });
         }
 
         // อัพเดทสถานะคำสั่งซื้อในฐานข้อมูล
         const updatedOrder = await Order.findByIdAndUpdate(
-            orderId, // ID ของคำสั่งซื้อ
-            { status }, // สถานะใหม่
-            { new: true } // ส่งข้อมูลที่อัพเดทแล้วกลับมา
+            orderId,
+            { status },
+            { new: true }
         ).populate([
             { path: "userId", select: "firstName lastName email" },
             { path: "gameId", select: "title price images" }
@@ -160,18 +159,18 @@ const updateOrderStatus = async (req, res) => {
 
         if (!updatedOrder) { // ถ้าไม่พบคำสั่งซื้อ
             return res.status(404).json({
-                message: "ไม่พบคำสั่งซื้อ"
+                message: "Order not found"
             });
         }
 
         res.status(200).json({
-            message: "อัพเดทสถานะเรียบร้อย",
+            message: "Order status updated successfully",
             order: updatedOrder
         });
     } catch (error) {
-        console.error("เกิดข้อผิดพลาดในการอัพเดทสถานะ:", error);
+        console.error("Error updating order status:", error);
         res.status(500).json({
-            message: "เกิดข้อผิดพลาดในการอัพเดทสถานะ",
+            message: "Server error",
             error: error.message
         });
     }
