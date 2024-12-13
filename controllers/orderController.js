@@ -1,7 +1,45 @@
-// Import โมเดลที่เกี่ยวข้อง
 import Order from "../models/orderModel.js";
 import GameData from "../models/gameDataModel.js";
 import User from "../models/userModel.js";
+import cloudinary from "cloudinary";
+
+// ฟังก์ชันอัปโหลดรูปภาพใบเสร็จ
+const uploadReceipt = async (req, res) => {
+    try {
+        const { orderId } = req.params;
+        const files = req.files;
+
+        if (!files || files.length === 0) {
+            return res.status(400).json({ message: "กรุณาอัปโหลดรูปภาพใบเสร็จ" });
+        }
+
+        const uploadedImages = [];
+        for (const file of files) {
+            const result = await cloudinary.v2.uploader.upload(file.path, {
+                folder: "paymentReceipts",
+            });
+            uploadedImages.push(result.secure_url);
+        }
+
+        const updatedOrder = await Order.findByIdAndUpdate(
+            orderId,
+            { $push: { paymentReceipts: { $each: uploadedImages } } },
+            { new: true }
+        );
+
+        if (!updatedOrder) {
+            return res.status(404).json({ message: "ไม่พบคำสั่งซื้อ" });
+        }
+
+        res.status(200).json({
+            message: "อัปโหลดรูปใบเสร็จสำเร็จ",
+            order: updatedOrder,
+        });
+    } catch (error) {
+        console.error("เกิดข้อผิดพลาดในการอัปโหลดใบเสร็จ:", error);
+        res.status(500).json({ message: "เกิดข้อผิดพลาดในเซิร์ฟเวอร์" });
+    }
+}
 
 
 // เพิ่มฟังก์ชันในการสร้างคำสั่งซื้อใหม่
@@ -15,6 +53,7 @@ const createOrder = async (req, res) => {
                 message: "ข้อมูลไม่ครบถ้วน กรุณากรอกข้อมูลให้ครบ"
             });
         }
+
 
         // ตรวจสอบว่าผู้ใช้และเกมที่ระบุมีอยู่จริง
         const user = await User.findById(userId); // ค้นหาผู้ใช้จาก ID
@@ -49,7 +88,8 @@ const createOrder = async (req, res) => {
         // ส่งคำตอบกลับไปยังผู้เรียก
         res.status(201).json({
             message: "สร้างคำสั่งซื้อสำเร็จ",
-            order: savedOrder
+            order: savedOrder,
+            orderId: savedOrder._id // ส่ง orderId กลับไปให้ frontend
         });
     } catch (error) {
         console.error("เกิดข้อผิดพลาดในการสร้างคำสั่งซื้อ:", error);
@@ -137,4 +177,4 @@ const updateOrderStatus = async (req, res) => {
     }
 };
 
-export { createOrder, getUserOrders, updateOrderStatus };
+export { createOrder, getUserOrders, updateOrderStatus, uploadReceipt };
